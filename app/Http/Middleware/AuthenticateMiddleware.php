@@ -20,7 +20,6 @@ class AuthenticateMiddleware
      */
     public function handle($request, Closure $next)
     {
-
         try {
             $token = JWTAuth::setRequest($request)->getToken();
             $payload = JWTAuth::setToken($token)->parseToken()->getPayload();
