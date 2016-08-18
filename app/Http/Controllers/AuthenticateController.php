@@ -7,8 +7,8 @@ use Facebook\Exceptions\FacebookSDKException;
 use Facebook\Facebook;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Config;use Tymon\JWTAuth\JWTAuth;
+use Tymon\JWTAuth\Facades\JWTFactory;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Models\User;
 
@@ -16,7 +16,6 @@ class AuthenticateController extends Controller
 {
     public function authenticate(Request $request)
     {
-        // grab credentials from the request
         $accessToken = $request->input('access_token');
         try {
             $fb = new Facebook(\Config::get('facebook'));
@@ -32,7 +31,9 @@ class AuthenticateController extends Controller
                 $currentUser->avatar_url = 'https://graph.facebook.com/' . $facebookUser['id'] . '/picture?type=large';
                 $currentUser->save();
             }
-            // TODO: Sign and return token
+            $claims = ['token' => $accessToken, 'user' => $currentUser];
+            $payload = JWTFactory::make($claims);
+            return JWTAuth::encode($payload);
         } catch (JWTException $e) {
             // something went wrong whilst attempting to encode the token
             return response()->json(['error' => 'Error creating the token'], 500);
