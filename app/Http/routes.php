@@ -15,3 +15,5 @@ use App\Models\User;
 */
 
 Route::post('/verify-facebook-token', 'AuthenticateController@authenticate');
+
+Route::resource('checkins', 'CheckinController');
