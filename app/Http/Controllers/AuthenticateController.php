@@ -14,11 +14,10 @@ use App\Models\User;
 
 class AuthenticateController extends Controller
 {
-    public function authenticate(Request $request)
+    public function authenticate(Request $request, Facebook $fb)
     {
         $accessToken = $request->input('access_token');
         try {
-            $fb = new Facebook(\Config::get('facebook'));
             $response = $fb->get('/me?fields=name,id', $accessToken);
             $facebookUser = $response->getGraphUser();
             $currentUser = null;
@@ -31,7 +30,7 @@ class AuthenticateController extends Controller
                 $currentUser->avatar_url = 'https://graph.facebook.com/' . $facebookUser['id'] . '/picture?type=large';
                 $currentUser->save();
             }
-            $claims = ['token' => $accessToken, 'user' => $currentUser];
+            $claims = ['token' => $accessToken, 'userid' => $currentUser->id];
             $payload = JWTFactory::make($claims);
             return JWTAuth::encode($payload);
         } catch (JWTException $e) {
@@ -49,8 +48,8 @@ class AuthenticateController extends Controller
         $token = JWTAuth::setRequest($request)->getToken();
         $payload = JWTAuth::setToken($token)->parseToken()->getPayload();
         try {
-            $user = User::where('id', $payload['user']['id'])->firstOrFail();
-            return 'Welcome, ' . $payload['user']['name'];
+            $user = User::where('id', $payload['userid'])->firstOrFail();
+            return 'Welcome, ' . $user->name;
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Requested user does not exist'], 500);
         }

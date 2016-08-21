@@ -24,10 +24,10 @@ class AuthenticateMiddleware
             $token = JWTAuth::setRequest($request)->getToken();
             $payload = JWTAuth::setToken($token)->parseToken()->getPayload();
             try {
-                User::where('id', $payload['user']['id'])->firstOrFail();
+                User::where('id', $payload['userid'])->firstOrFail();
                 return $next($request);
             } catch (ModelNotFoundException $e) {
-                return response()->json(['error' => 'Requested user does not exist'], 500);
+                return response()->json(['error' => 'The request user does not exist'], 500);
             }
         } catch (TokenExpiredException $e) {
             return response()->json(['error' => 'Token expired'], 500);

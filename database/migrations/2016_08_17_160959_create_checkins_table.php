@@ -16,7 +16,7 @@ class CreateCheckinsTable extends Migration
             $table->increments('id');
             $table->string('fb_id')->nullable();
             $table->uuid('user_id');
-            $table->integer('place_id')->length(10)->unsigned();;
+            $table->integer('place_id')->length(10)->unsigned();
             $table->timestamp('checkin_time');
         });
     }
