@@ -25,7 +25,7 @@ class CheckinController extends Controller
      *
      * @param  \Illuminate\Http\Request $request
      * @param Facebook $fb
-     * @return \Illuminate\Http\Response
+     * @return array|\Facebook\GraphNodes\GraphEdge|null
      */
     public function index(Request $request, Facebook $fb)
     {
@@ -37,6 +37,13 @@ class CheckinController extends Controller
             $user = User::where('id', $payload['userid'])->firstOrFail();
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'The request user does not exist'], 500);
+        }
+
+        // Get request data format
+        $format = $request->input('format');
+        $useGeoJson = false;
+        if ($format == 'geojson') {
+            $useGeoJson = true;
         }
 
         $userId = $user->id;
@@ -83,9 +90,17 @@ class CheckinController extends Controller
         $user->save();
         $checkins = $user->checkins;
         $checkins->load('place');
-        return $checkins->map(function ($item, $key) {
-            return $this->createGeoJsonResponse($item);
-        });
+        if ($useGeoJson) {
+            $featuresArray = $checkins->map(function ($item, $key) {
+                return $this->createGeoJsonResponse($item);
+            });
+            return [
+                'type' => 'FeatureCollection',
+                'crs' => ['type' => 'name', 'properties' => ['name' => 'urn:ogc:def:crs:OGC:1.3:CRS84']],
+                'features' => $featuresArray
+            ];
+        }
+        return $checkins;
     }
 
     /**
@@ -167,14 +182,14 @@ class CheckinController extends Controller
     {
         $place = $checkin->place;
         return [
-            'id' => $checkin->id,
-            'fb_id' => $checkin->fb_id,
-            'user_id' => $checkin->user_id,
-            'place_id' => $checkin->place_id,
-            'checkin_time' => $checkin->checkin_time,
-            'place' => [
-                'type' => 'Feature',
-                'properties' => [
+            'type' => 'Feature',
+            'properties' => [
+                'id' => $checkin->id,
+                'fb_id' => $checkin->fb_id,
+                'user_id' => $checkin->user_id,
+                'place_id' => $checkin->place_id,
+                'checkin_time' => $checkin->checkin_time,
+                'place' => [
                     'id' => $place->id,
                     'fb_id' => $place->fb_id,
                     'name' => $place->name,
@@ -182,11 +197,11 @@ class CheckinController extends Controller
                     'street' => $place->street,
                     'zip' => $place->zip,
                     'country' => $place->country
-                ],
-                'geometry' => [
-                    'type' => 'Point',
-                    'coordinates' => [$place->long, $place->lat]
                 ]
+            ],
+            'geometry' => [
+                'type' => 'Point',
+                'coordinates' => [$place->long, $place->lat]
             ]
         ];
     }
