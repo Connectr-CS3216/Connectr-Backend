@@ -16,6 +16,9 @@ class AuthenticateController extends Controller
 {
     public function authenticate(Request $request, Facebook $fb)
     {
+        if (!$request->has('access_token')) {
+            return response()->json(['error' => 'No access token present in the request data'], 500);
+        }
         $accessToken = $request->input('access_token');
         try {
             $response = $fb->get('/me?fields=name,id', $accessToken);
