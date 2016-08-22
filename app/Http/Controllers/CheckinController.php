@@ -46,7 +46,7 @@ class CheckinController extends Controller
         // Check if this is the first time getting data
         // If YES, set the boolean to be false, and just pull all tagged_places.
         // If NO, get the last_login_time, and get all tagged_places that is created after last_login_time.
-        $checkins = $fb->get('me/tagged_places?limit=100', $accessToken)->getGraphEdge();
+        $checkins = $fb->get('me/tagged_places?limit=250', $accessToken)->getGraphEdge();
         $hasLoadedAll = false;
         do {
             foreach ($checkins as $checkin) {
@@ -83,7 +83,9 @@ class CheckinController extends Controller
         $user->save();
         $checkins = $user->checkins;
         $checkins->load('place');
-        return $checkins;
+        return $checkins->map(function ($item, $key) {
+            return $this->createGeoJsonResponse($item);
+        });
     }
 
     /**
@@ -94,7 +96,7 @@ class CheckinController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // TODO
     }
 
     /**
@@ -105,18 +107,7 @@ class CheckinController extends Controller
      */
     public function show($id)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        // TODO
     }
 
     /**
@@ -128,7 +119,7 @@ class CheckinController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        // TODO
     }
 
     /**
@@ -170,5 +161,33 @@ class CheckinController extends Controller
         $newCheckin->checkin_time = $checkinTime;
         $newCheckin->save();
         return $newCheckin;
+    }
+
+    private function createGeoJsonResponse($checkin)
+    {
+        $place = $checkin->place;
+        return [
+            'id' => $checkin->id,
+            'fb_id' => $checkin->fb_id,
+            'user_id' => $checkin->user_id,
+            'place_id' => $checkin->place_id,
+            'checkin_time' => $checkin->checkin_time,
+            'place' => [
+                'type' => 'Feature',
+                'properties' => [
+                    'id' => $place->id,
+                    'fb_id' => $place->fb_id,
+                    'name' => $place->name,
+                    'city' => $place->city,
+                    'street' => $place->street,
+                    'zip' => $place->zip,
+                    'country' => $place->country
+                ],
+                'geometry' => [
+                    'type' => 'Point',
+                    'coordinates' => [$place->long, $place->lat]
+                ]
+            ]
+        ];
     }
 }
