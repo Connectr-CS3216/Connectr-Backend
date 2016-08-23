@@ -187,17 +187,14 @@ class CheckinController extends Controller
                 'id' => $checkin->id,
                 'fb_id' => $checkin->fb_id,
                 'user_id' => $checkin->user_id,
-                'place_id' => $checkin->place_id,
                 'checkin_time' => $checkin->checkin_time,
-                'place' => [
-                    'id' => $place->id,
-                    'fb_id' => $place->fb_id,
-                    'name' => $place->name,
-                    'city' => $place->city,
-                    'street' => $place->street,
-                    'zip' => $place->zip,
-                    'country' => $place->country
-                ]
+                'place_id' => $place->id,
+                'place_fb_id' => $place->fb_id,
+                'place_name' => $place->name,
+                'place_city' => $place->city,
+                'place_street' => $place->street,
+                'place_zip' => $place->zip,
+                'place_country' => $place->country
             ],
             'geometry' => [
                 'type' => 'Point',
