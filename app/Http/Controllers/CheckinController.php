@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Checkin;
 use App\Models\Place;
 use App\Models\User;
+use DateTime;
 use Facebook\Facebook;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
@@ -49,6 +50,7 @@ class CheckinController extends Controller
         $userId = $user->id;
         $isFirstTimeLogin = $user->is_first_login == 1;
         $lastLoginTime = $user->last_login_time;
+        $lastLogin = new DateTime($lastLoginTime);
 
         // Check if this is the first time getting data
         // If YES, set the boolean to be false, and just pull all tagged_places.
@@ -58,7 +60,7 @@ class CheckinController extends Controller
         do {
             foreach ($checkins as $checkin) {
                 // Checks if there is any new checkins that is created after the last login time.
-                if (!$isFirstTimeLogin && $checkin->getField('created_time') > $lastLoginTime) {
+                if (!$isFirstTimeLogin && $checkin->getField('created_time') < $lastLogin) {
                     $hasLoadedAll = true;
                     break;
                 }
@@ -91,6 +93,7 @@ class CheckinController extends Controller
             }
         } while ($checkins = $fb->next($checkins));
         $user->is_first_login = 0;
+        $user->last_login_time = date('Y-m-d H:i:s');
         $user->save();
         $checkins = $user->checkins;
         $checkins->load('place');
