@@ -22,3 +22,6 @@ Route::get('/whoami',  [
     'middleware' => 'auth',
     'uses' => 'AuthenticateController@whoami'
 ]);
+
+// Publish a open graph story on user's wall
+Route::get('/publish', 'PublishController@publish');
