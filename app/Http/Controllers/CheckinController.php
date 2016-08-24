@@ -65,6 +65,10 @@ class CheckinController extends Controller
 
                 $place = $checkin->getField('place');
                 $location = $place->getField('location');
+                if ($location->getField('latitude') === null || $location->getField('longitude') === null) {
+                    // We have to skip checkins without geolocation.
+                    continue;
+                }
                 $placeCreated = $this->createOrReturnExistingPlaceModel(
                     $place->getField('id'),
                     $place->getField('name'),
