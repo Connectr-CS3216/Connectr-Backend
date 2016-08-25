@@ -14,13 +14,23 @@ use App\Models\User;
 |
 */
 
+// Verify access token (login)
 Route::post('/verify-facebook-token', 'AuthenticateController@authenticate');
 
-Route::resource('checkins', 'CheckinController');
-
+// Debug
 Route::get('/whoami',  [
     'middleware' => 'auth',
     'uses' => 'AuthenticateController@whoami'
+]);
+
+// Checkins data
+Route::get('/checkins',  'CheckinController@index');
+Route::get('/checkins/{friendId}',  'CheckinController@getCheckinsByFriendId');
+
+// Get all friends
+Route::get('/friends', [
+    'middleware' => 'auth',
+    'uses' => 'FriendController@index'
 ]);
 
 // Publish a open graph story on user's wall

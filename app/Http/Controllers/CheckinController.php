@@ -101,58 +101,58 @@ class CheckinController extends Controller
             $featuresArray = $checkins->map(function ($item, $key) {
                 return $this->createGeoJsonResponse($item);
             });
-            return [
-                'type' => 'FeatureCollection',
-                'crs' => ['type' => 'name', 'properties' => ['name' => 'urn:ogc:def:crs:OGC:1.3:CRS84']],
-                'features' => $featuresArray
-            ];
+            return $this->createGeoJsonFeaturesArray($featuresArray);
         }
         return $checkins;
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param Facebook $fb
+     * @param  string $friendId
+     * @return array|\Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function getCheckinsByFriendId(Request $request, Facebook $fb, $friendId)
     {
-        // TODO
-    }
+        $token = JWTAuth::setRequest($request)->getToken();
+        $payload = JWTAuth::setToken($token)->parseToken()->getPayload();
+        $accessToken = $payload['token'];
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        // TODO
-    }
+        // Get request data format
+        $format = $request->input('format');
+        $useGeoJson = false;
+        if ($format == 'geojson') {
+            $useGeoJson = true;
+        }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        // TODO
-    }
+        $user = null;
+        try {
+            $user = User::where('id', $payload['userid'])->firstOrFail();
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'The request user does not exist'], 500);
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        // Make sure friend exists in the app.
+        try {
+            $friend = User::where('id', $friendId)->firstOrFail();
+            // verify the relationship
+            $isFriend = $this->isFriend($fb, $friend, $accessToken);
+            if ($isFriend) {
+                $checkins = $friend->checkins;
+                $checkins->load('place');
+                if ($useGeoJson) {
+                    $featuresArray = $checkins->map(function ($item, $key) {
+                        return $this->createGeoJsonResponse($item);
+                    });
+                    return $this->createGeoJsonFeaturesArray($featuresArray);
+                }
+                return $checkins;
+            }
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'The request friend is invalid'], 500);
+        }
+
+        return response()->json(['error' => 'The request friend is invalid'], 500);
     }
 
     private function createOrReturnExistingPlaceModel($facebookId, $name, $lat, $long, $city, $street, $zip, $country)
@@ -207,6 +207,30 @@ class CheckinController extends Controller
                 'type' => 'Point',
                 'coordinates' => [$place->long, $place->lat]
             ]
+        ];
+    }
+
+    /**
+     * @param Facebook $fb
+     * @param $friend
+     * @param $accessToken
+     * @return int
+     */
+    private function isFriend(Facebook $fb, $friend, $accessToken)
+    {
+        return $fb->get('me/friends/' . $friend->fb_id, $accessToken)->getGraphEdge()->count() == 1;
+    }
+
+    /**
+     * @param $featuresArray
+     * @return array
+     */
+    private function createGeoJsonFeaturesArray($featuresArray)
+    {
+        return [
+            'type' => 'FeatureCollection',
+            'crs' => ['type' => 'name', 'properties' => ['name' => 'urn:ogc:def:crs:OGC:1.3:CRS84']],
+            'features' => $featuresArray
         ];
     }
 }
