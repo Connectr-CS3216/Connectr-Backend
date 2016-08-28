@@ -14,10 +14,14 @@ class UserController extends Controller
 {
     public function deauthorize(Request $request)
     {
-        $signedPayload = $request->input('signed_request');
+        $signedPayload = $request->input('signed_request', '');
+        if ($signedPayload == '') {
+            return response()->json(['error' => 'Invalid payload data'], 500);
+        }
         $payload = $this->parseSignedRequest($signedPayload);
         if ($payload == null) {
             // Invalid payload
+            error_log('Invalid payload data '.$signedPayload);
             return response()->json(['error' => 'Invalid payload data'], 500);
         }
         $userFbId = $payload['user_id'];
