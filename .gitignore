@@ -63,3 +63,4 @@ modules.xml
 *.ipr
 
 composer.phar
+vagrant.xml
