@@ -35,3 +35,6 @@ Route::get('/friends', [
 
 // Publish a open graph story on user's wall
 Route::post('/publish', 'PublishController@publish');
+
+// De-authorize the user if the user removed the application.
+Route::post('/deauthorize', 'UserController@deauthorize');
