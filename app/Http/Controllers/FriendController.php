@@ -32,7 +32,7 @@ class FriendController extends Controller
                     $friendList[] = $friendModel->getMetaData();
                 }
             }
-        } while ($checkins = $fb->next($friends));
+        } while ($friends = $fb->next($friends));
         return $friendList;
     }
 }
