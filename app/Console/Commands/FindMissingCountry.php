@@ -39,16 +39,16 @@ class FindMissingCountry extends Command
     public function handle()
     {
         $mapboxSecret = env('MAPBOX_API_SECRET', '');
-        try {
-            $places = Place::where('country', '')->get();
-            foreach ($places as $place) {
+        $places = Place::where('country', '')->get();
+        foreach ($places as $place) {
+            try {
                 $data = $this->getGeoLocation($place->lat, $place->long, $mapboxSecret);
                 $country = $data['features'][0]['place_name'];
                 $place->country = $country;
                 $place->save();
+            } catch (\Exception $e) {
+                error_log($e);
             }
-        } catch (\Exception $e) {
-            error_log($e);
         }
     }
 
