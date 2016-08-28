@@ -34,4 +34,4 @@ Route::get('/friends', [
 ]);
 
 // Publish a open graph story on user's wall
-Route::get('/publish', 'PublishController@publish');
+Route::post('/publish', 'PublishController@publish');
