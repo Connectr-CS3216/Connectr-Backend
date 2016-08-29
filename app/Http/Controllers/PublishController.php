@@ -23,7 +23,7 @@ class PublishController extends Controller
             'api_key' => env('CLOUDINARY_KEY', ''),
             'api_secret' => env('CLOUDINARY_SECRET', '')
         ]);
-        $output = \Cloudinary\Uploader::upload($data,[
+        $output = \Cloudinary\Uploader::upload($data, [
             'transformation' => [
                 [
                     "width" => 1200,
@@ -54,16 +54,15 @@ class PublishController extends Controller
                 'description' => $description,
                 'image' => $output['url']
             ];
-            $map = ['map' => json_encode($object), 'fb:explicitly_shared' => True];
+            $map = ['map' => json_encode($object), 'fb:explicitly_shared' => true];
             $response = $fb->post('/me/ogcustom:create', $map, $payload['token']);
-            return response()->json(['success' => True]);
+            return response()->json(['success' => true]);
         } catch (JWTException $e) {
             // something went wrong whilst attempting to decode the token
             return response()->json(['error' => 'Error creating the token'], 500);
-        } catch(FacebookResponseException $e) {
-            return $e;
+        } catch (FacebookResponseException $e) {
             return response()->json(['error' => 'Graph returned an error'], 500);
-        } catch(FacebookSDKException $e) {
+        } catch (FacebookSDKException $e) {
             return response()->json(['error' => 'Facebook SDK returned an error'], 500);
         }
     }
