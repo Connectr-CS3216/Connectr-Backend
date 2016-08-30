@@ -39,5 +39,7 @@ Route::post('/publish', [
     'uses' => 'PublishController@publish'
 ]);
 
+Route::get('/stats', 'StatsController@index');
+
 // De-authorize the user if the user removed the application.
 Route::post('/deauthorize', 'UserController@deauthorize');

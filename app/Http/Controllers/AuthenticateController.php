@@ -45,16 +45,4 @@ class AuthenticateController extends Controller
             return response()->json(['error' => 'Facebook SDK returned an error'], 500);
         }
     }
-
-    public function whoami(Request $request)
-    {
-        $token = JWTAuth::setRequest($request)->getToken();
-        $payload = JWTAuth::setToken($token)->parseToken()->getPayload();
-        try {
-            $user = User::where('id', $payload['userid'])->firstOrFail();
-            return 'Welcome, ' . $user->name;
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'Requested user does not exist'], 500);
-        }
-    }
 }
