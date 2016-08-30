@@ -17,15 +17,15 @@ use App\Models\User;
 // Verify access token (login)
 Route::post('/verify-facebook-token', 'AuthenticateController@authenticate');
 
-// Debug
-Route::get('/whoami',  [
-    'middleware' => 'auth',
-    'uses' => 'AuthenticateController@whoami'
-]);
-
 // Checkins data
-Route::get('/checkins',  'CheckinController@index');
-Route::get('/checkins/{friendId}',  'CheckinController@getCheckinsByFriendId');
+Route::get('/checkins', 'CheckinController@index');
+Route::get('/checkins/{friendId}', 'CheckinController@getCheckinsByFriendId');
+
+// Get user itself
+Route::get('/user/me', [
+    'middleware' => 'auth',
+    'uses' => 'UserController@me'
+]);
 
 // Get all friends
 Route::get('/friends', [
@@ -34,7 +34,10 @@ Route::get('/friends', [
 ]);
 
 // Publish a open graph story on user's wall
-Route::post('/publish', 'PublishController@publish');
+Route::post('/publish', [
+    'middleware' => 'auth',
+    'uses' => 'PublishController@publish'
+]);
 
 // De-authorize the user if the user removed the application.
 Route::post('/deauthorize', 'UserController@deauthorize');

@@ -9,9 +9,24 @@ use Illuminate\Http\Request;
 use Facebook\FacebookApp;
 use Facebook\SignedRequest;
 use App\Http\Requests;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
 {
+    public function me(Request $request) {
+        $token = JWTAuth::setRequest($request)->getToken();
+        $payload = JWTAuth::setToken($token)->parseToken()->getPayload();
+        $accessToken = $payload['token'];
+        $user = null;
+        try {
+            $user = User::where('id', $payload['userid'])->firstOrFail();
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'The request user does not exist'], 500);
+        }
+
+        return $user->getMetaData();
+    }
+
     public function deauthorize(Request $request)
     {
         $signedPayload = $request->input('signed_request', '');
