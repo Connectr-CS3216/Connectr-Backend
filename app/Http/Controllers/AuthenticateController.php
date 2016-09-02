@@ -39,9 +39,9 @@ class AuthenticateController extends Controller
         } catch (JWTException $e) {
             // something went wrong whilst attempting to encode the token
             return response()->json(['error' => 'Error creating the token'], 500);
-        } catch(FacebookResponseException $e) {
+        } catch (FacebookResponseException $e) {
             return response()->json(['error' => 'Graph returned an error'], 500);
-        } catch(FacebookSDKException $e) {
+        } catch (FacebookSDKException $e) {
             return response()->json(['error' => 'Facebook SDK returned an error'], 500);
         }
     }

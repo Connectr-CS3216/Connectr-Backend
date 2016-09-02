@@ -12,12 +12,12 @@ class CreateConstraints extends Migration
      */
     public function up()
     {
-        Schema::table('checkins', function(Blueprint $table) {
+        Schema::table('checkins', function (Blueprint $table) {
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('place_id')->references('id')->on('places')->onDelete('cascade');
         });
 
-        Schema::table('comments', function(Blueprint $table) {
+        Schema::table('comments', function (Blueprint $table) {
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('checkin_id')->references('id')->on('checkins')->onDelete('cascade');
         });
@@ -35,7 +35,7 @@ class CreateConstraints extends Migration
             $table->dropForeign('checkins_place_id_foreign');
         });
 
-        Schema::table('comments', function(Blueprint $table) {
+        Schema::table('comments', function (Blueprint $table) {
             $table->dropForeign('comments_user_id_foreign');
             $table->dropForeign('comments_checkin_id_foreign');
         });

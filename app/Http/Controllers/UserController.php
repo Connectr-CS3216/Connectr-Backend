@@ -13,7 +13,8 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
 {
-    public function me(Request $request) {
+    public function me(Request $request)
+    {
         $token = JWTAuth::setRequest($request)->getToken();
         $payload = JWTAuth::setToken($token)->parseToken()->getPayload();
         $accessToken = $payload['token'];
@@ -36,7 +37,7 @@ class UserController extends Controller
         $payload = $this->parseSignedRequest($signedPayload);
         if ($payload == null) {
             // Invalid payload
-            error_log('Invalid payload data '.$signedPayload);
+            error_log('Invalid payload data ' . $signedPayload);
             return response()->json(['error' => 'Invalid payload data'], 500);
         }
         $userFbId = $payload['user_id'];

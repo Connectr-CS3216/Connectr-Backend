@@ -31,7 +31,8 @@ class StatsController extends Controller
         ];
     }
 
-    private function getFriendStats(Facebook $fb, $userId, $accessToken) {
+    private function getFriendStats(Facebook $fb, $userId, $accessToken)
+    {
         $friendList = $this->getFriends($fb, $accessToken);
         $friendList[] = $userId; // add the user itself
         $mostVisitedCountries_friends = $this->getCountryStats(true, true, $friendList);

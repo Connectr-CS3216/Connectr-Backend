@@ -12,7 +12,8 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class FriendController extends Controller
 {
-    public function index(Request $request, Facebook $fb) {
+    public function index(Request $request, Facebook $fb)
+    {
         $token = JWTAuth::setRequest($request)->getToken();
         $payload = JWTAuth::setToken($token)->parseToken()->getPayload();
         $accessToken = $payload['token'];

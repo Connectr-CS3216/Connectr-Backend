@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
-class User extends UuidModel {
-    public function checkins() {
+class User extends UuidModel
+{
+    public function checkins()
+    {
         return $this->hasMany('App\Models\Checkin');
     }
 
-    public function getMetaData() {
+    public function getMetaData()
+    {
         $checkins = $this->checkins();
         return [
             'id' => $this->id,
@@ -18,7 +21,8 @@ class User extends UuidModel {
         ];
     }
 
-    public function isFirstTimeLogin() {
+    public function isFirstTimeLogin()
+    {
         return $this->is_first_login == 1;
     }
 }

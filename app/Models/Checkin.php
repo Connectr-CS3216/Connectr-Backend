@@ -8,7 +8,8 @@ class Checkin extends Model
 {
     public $timestamps = false;
 
-    public function place() {
+    public function place()
+    {
         return $this->belongsTo('App\Models\Place');
     }
 }
